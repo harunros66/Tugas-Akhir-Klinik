@@ -1,0 +1,252 @@
+package tugasakhir;
+import java.io.*;
+import java.util.*;
+
+public class TugasAkhir {
+    static ArrayList<String> noPelanggan = new ArrayList<>();
+    static ArrayList<String> namaPelanggan = new ArrayList<>();
+    static ArrayList<Integer> kodePerawatan = new ArrayList<>();
+    static ArrayList<Integer> hargaPokok = new ArrayList<>();
+    static ArrayList<Integer> totalHarga = new ArrayList<>();
+    static ArrayList<Integer> discount = new ArrayList<>();
+    static boolean jalan = true;
+
+    static BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+    
+    public static void main(String[] args) throws IOException {
+        while (jalan) {
+            showMenu();
+        }
+    }
+    
+    static void showMenu() throws IOException {
+        System.out.println("\n========= MENU =========");
+        System.out.println("1. Lihat Data Pelanggan");
+        System.out.println("2. Tambah Data Pelanggan");
+        System.out.println("3. Edit Data Pelanggan");
+        System.out.println("4. Hapus Data Pelanggan");
+        System.out.println("5. Keluar");
+        System.out.print("Pilih menu: ");
+        int pilihMenu = Integer.parseInt(br.readLine());
+        
+        switch (pilihMenu) {
+            case 1:
+                showAllPelanggan(); break;
+            case 2:
+                inputPelanggan(); break;
+            case 3:
+                editPelanggan(); break;
+            case 4:
+                deletePelanggan(); break;
+            case 5:
+                jalan = false;
+                System.out.println("Program dihentikan. Terima kasih!");
+                break;
+            default:
+                System.out.println("Menu tidak valid!");
+        }
+    }
+    
+    static void showAllPelanggan() throws IOException {
+        int hal = 1;
+        int perHal = 3;
+        int totalHal = (int) Math.ceil((double) noPelanggan.size() / perHal);
+        
+        while (true) {
+            System.out.println("\n"
+                         + "========================================= LAPORAN KLINIK KECANTIKAN GRAND =========================================\n");
+            System.out.println("    DATA PELANGGAN                                                                                      Hal " + hal + "\n");
+            
+            if (noPelanggan.isEmpty()) {
+                System.out.println("Data Pelanggan Tidak tersedia!");
+                return;
+            } else {
+                double totalBayar = 0;
+                
+                System.out.printf("+====+=================+================+====================+=======================+============+===============+\n"); 
+                System.out.printf("| No | Nomor Pelanggan | Nama Pelanggan |    List Pesanan    |     Harga Pesanan     |  Discount  |  Total Bayar  |\n");
+                System.out.printf("|====|=================|================|====================|=======================|============|===============|\n");
+
+                int start = (hal - 1) * perHal;
+                int end = Math.min(start + perHal, noPelanggan.size());
+                
+                for (int i = start; i < end; i++) {
+                    double totalHargaAkhir = hargaPokok.get(i) - discount.get(i);
+                    totalBayar += totalHargaAkhir;
+                    
+                    System.out.printf("|%-4s|%-17s|%-16s|%-20s|Rp. %-19s|Rp. %-8s|Rp. %-11s|\n",
+                            i + 1,
+                        noPelanggan.get(i),
+                            namaPelanggan.get(i),
+                            getPerawatan(kodePerawatan.get(i)),
+                            hargaPokok.get(i),
+                            discount.get(i),
+                            totalHargaAkhir);
+                }
+                System.out.printf("|=================================================================================================|===============|\n");
+
+                System.out.printf("|         Total Keseluruhan             |                                                         |Rp. %-11s|\n",
+                    totalBayar
+                );
+
+                System.out.printf("+=================================================================================================|===============+\n");
+            }
+
+            if (hal < totalHal) {
+                System.out.print("Lanjut ke halaman berikutnya? (y/t): ");
+                if (br.readLine().equalsIgnoreCase("y")) {
+                    hal++;
+                } else {
+                    break;
+                }
+            } else {
+                break;
+            }
+        }
+    }
+
+    static void inputPelanggan() throws IOException {
+        boolean berjalan = true;
+        while (berjalan) {
+            System.out.println("\n=========== TAMBAH DATA ===========");
+            
+            System.out.print("Nomor Pelanggan    : ");
+            String nomor = br.readLine();
+            System.out.print("Nama Pelanggan     : ");
+            String nama = br.readLine();
+            
+            System.out.print("List Pesanan \n"
+                    + "1. Kapsul a-DHA          : Rp. 87.000\n"
+                    + "2. Cream Wajah           : Rp. 125.000\n"
+                    + "3. Skin Treatmen         : Rp. 775.000\n"
+                        + "4. Face Treatmen         : Rp. 968.000\n"
+                    + "5. Suntik Wajah          : Rp. 1.026.000\n");
+            System.out.print("Masukkan Kode Pemesanan       : ");
+            int kode = Integer.parseInt(br.readLine());
+            int harga = getHarga(kode);
+                
+            int ds = 0;
+            if (harga >= 1000000) {
+                ds = harga * 15 / 100;
+            } else if (harga >= 100000) {
+                ds = harga * 5 / 100;
+            }
+                
+            int totalHargaVal = harga - ds;
+            discount.add(ds);
+            kodePerawatan.add(kode);
+            hargaPokok.add(harga);
+            totalHarga.add(totalHargaVal);
+            namaPelanggan.add(nama);
+            noPelanggan.add(nomor);
+            System.out.println("Data berhasil ditambahkan ke database!");
+            System.out.print("Isi Data lagi? (y/t): ");
+            if (br.readLine().equalsIgnoreCase("t")) {
+                berjalan = false;
+            }
+        }
+    }
+
+    static void editPelanggan() throws IOException {
+        boolean berjalan = true;
+        while (berjalan) {
+        System.out.println("\n==================================================== EDIT DATA ====================================================");
+        showAllPelanggan();
+        System.out.print("Pilih nomor pelanggan yang ingin di-edit: ");
+        int index = Integer.parseInt(br.readLine()) - 1;
+        
+        if (index >= 0 && index < noPelanggan.size()) {
+            System.out.print("Nomor Pelanggan baru : ");
+            noPelanggan.set(index, br.readLine());
+            System.out.print("Nama Pelanggan baru  : ");
+            namaPelanggan.set(index, br.readLine());
+            System.out.print("List Pesanan \n"
+                    + "1. Kapsul a-DHA          : Rp. 87.000\n"
+                    + "2. Cream Wajah           : Rp. 125.000\n"
+                    + "3. Skin Treatmen         : Rp. 775.000\n"
+                    + "4. Face Treatmen         : Rp. 968.000\n"
+                    + "5. Suntik Wajah          : Rp. 1.026.000\n");
+            System.out.print("Masukkan Kode Baru : ");
+            int kode = Integer.parseInt(br.readLine());
+            kodePerawatan.set(index, kode);
+            hargaPokok.set(index, getHarga(kode));
+            
+            int harga = hargaPokok.get(index);  
+            int ds = 0;
+            if (harga >= 1000000) {
+                ds = harga * 15 / 100;
+            } else if (harga >= 100000) {
+                ds = harga * 5 / 100;
+            }
+            discount.set(index, ds);
+            totalHarga.set(index, harga - ds);
+        } else {
+            System.out.println("Data tidak ada dalam database!");
+        }
+        System.out.println("Data berhasil diedit!");
+        System.out.print("Edit Data Lagi? (y/t): ");
+        if (br.readLine().equalsIgnoreCase("t")) {
+            berjalan = false;}
+        }
+    }
+
+    static void deletePelanggan() throws IOException {
+        boolean berjalan = true;
+        while (berjalan) {
+        System.out.println("\n==================================================== HAPUS DATA ===================================================");
+        showAllPelanggan();
+        System.out.print("Pilih nomor pelanggan yang ingin dihapus : ");
+        int index = Integer.parseInt(br.readLine()) - 1;
+        
+        if (index >= 0 && index < noPelanggan.size()) {
+            noPelanggan.remove(index);
+            namaPelanggan.remove(index);
+            kodePerawatan.remove(index);
+            hargaPokok.remove(index);
+            discount.remove(index);
+            totalHarga.remove(index);
+            
+        } else {
+            System.out.println("Data tidak ada dalam database!");
+        }
+        System.out.println("Data berhasil dihapus!");
+        System.out.print("Hapus Data Lagi? (y/t): ");
+        if (br.readLine().equalsIgnoreCase("t")) {
+            berjalan = false;}
+        }
+    }
+
+    static int getHarga(int kode) {
+        switch (kode) {
+            case 1:
+                return 87000;
+            case 2:
+                return 125000;
+            case 3:
+                return 775000;
+            case 4:
+                return 968000;
+            case 5:
+                return 1026000;
+            default:
+                return 0;
+        }
+    }
+
+    static String getPerawatan(int kode) {
+        switch (kode) {
+            case 1:
+                return "Kapsul a-DHA";
+            case 2:
+                return "Cream Wajah";
+            case 3:
+                return "Skin Treatmen";
+            case 4:
+                return "Face Treatmen";
+            case 5:
+                return "Suntik Wajah";
+            default:
+                return "pilihan tidak tersedia";
+        }
+    }
+}
