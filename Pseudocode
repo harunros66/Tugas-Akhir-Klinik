@@ -1,0 +1,209 @@
+PROGRAM TugasAkhir
+
+DECLARE noPelanggan AS ArrayList<String>
+DECLARE namaPelanggan AS ArrayList<String>
+DECLARE kodePerawatan AS ArrayList<Integer>
+DECLARE hargaPokok AS ArrayList<Integer>
+DECLARE totalHarga AS ArrayList<Integer>
+DECLARE discount AS ArrayList<Integer>
+DECLARE jalan AS Boolean = true
+
+DECLARE br AS BufferedReader
+
+FUNCTION main
+    WHILE jalan IS TRUE
+        CALL showMenu()
+    END WHILE
+END FUNCTION
+
+FUNCTION showMenu
+    PRINT "========= MENU ========="
+    PRINT "1. Lihat Data Pelanggan"
+    PRINT "2. Tambah Data Pelanggan"
+    PRINT "3. Edit Data Pelanggan"
+    PRINT "4. Hapus Data Pelanggan"
+    PRINT "5. Keluar"
+    PRINT "Pilih menu: "
+    DECLARE pilihMenu AS Integer = READ Integer from br
+
+    SWITCH pilihMenu
+        CASE 1:
+            CALL showAllPelanggan()
+        CASE 2:
+            CALL inputPelanggan()
+        CASE 3:
+            CALL editPelanggan()
+        CASE 4:
+            CALL deletePelanggan()
+        CASE 5:
+            jalan = false
+            PRINT "Program dihentikan. Terima kasih!"
+        DEFAULT:
+            PRINT "Menu tidak valid!"
+    END SWITCH
+END FUNCTION
+
+FUNCTION showAllPelanggan
+    DECLARE hal AS Integer = 1
+    DECLARE perHal AS Integer = 3
+    DECLARE totalHal AS Integer = CEIL(noPelanggan.size() / perHal)
+
+    WHILE TRUE
+        PRINT "LAPORAN KLINIK KECANTIKAN GRAND"
+        PRINT "DATA PELANGGAN Hal " + hal
+
+        IF noPelanggan IS EMPTY THEN
+            PRINT "Data Pelanggan Tidak tersedia!"
+            RETURN
+        ELSE
+            DECLARE totalBayar AS Double = 0
+            PRINT table header
+
+            DECLARE start AS Integer = (hal - 1) * perHal
+            DECLARE end AS Integer = MIN(start + perHal, noPelanggan.size())
+
+            FOR i FROM start TO end
+                DECLARE totalHargaAkhir AS Double = hargaPokok.get(i) - discount.get(i)
+                totalBayar += totalHargaAkhir
+                PRINT data pelanggan
+            END FOR
+
+            PRINT total bayar
+        END IF
+
+        IF hal < totalHal THEN
+            PRINT "Lanjut ke halaman berikutnya? (y/t): "
+            IF READ from br EQUALS "y" THEN
+                hal += 1
+            ELSE
+                BREAK
+            END IF
+        ELSE
+            BREAK
+        END IF
+    END WHILE
+END FUNCTION
+
+FUNCTION inputPelanggan
+    DECLARE berjalan AS Boolean = true
+    WHILE berjalan IS TRUE
+        PRINT "TAMBAH DATA"
+        PRINT "Nomor Pelanggan: "
+        DECLARE nomor AS String = READ from br
+        PRINT "Nama Pelanggan: "
+        DECLARE nama AS String = READ from br
+        PRINT "List Pesanan"
+        PRINT "Masukkan Kode Pemesanan: "
+        DECLARE kode AS Integer = READ Integer from br
+        DECLARE harga AS Integer = CALL getHarga(kode)
+
+        DECLARE ds AS Integer = 0
+        IF harga >= 1000000 THEN
+            ds = harga * 15 / 100
+        ELSE IF harga >= 100000 THEN
+            ds = harga * 5 / 100
+        END IF
+
+        DECLARE totalHargaVal AS Integer = harga - ds
+        ADD ds TO discount
+        ADD kode TO kodePerawatan
+        ADD harga TO hargaPokok
+        ADD totalHargaVal TO totalHarga
+        ADD nama TO namaPelanggan
+        ADD nomor TO noPelanggan
+        PRINT "Data berhasil ditambahkan ke database!"
+        PRINT "Isi Data lagi? (y/t): "
+        IF READ from br EQUALS "t" THEN
+            berjalan = false
+        END IF
+    END WHILE
+END FUNCTION
+
+FUNCTION editPelanggan
+    DECLARE berjalan AS Boolean = true
+    WHILE berjalan IS TRUE
+        PRINT "EDIT DATA"
+        CALL showAllPelanggan()
+        PRINT "Pilih nomor pelanggan yang ingin di-edit: "
+        DECLARE index AS Integer = READ Integer from br - 1
+
+        IF index IS VALID THEN
+            PRINT "Nomor Pelanggan baru: "
+            noPelanggan.set(index, READ from br)
+            PRINT "Nama Pelanggan baru: "
+            namaPelanggan.set(index, READ from br)
+            PRINT "List Pesanan"
+            PRINT "Masukkan Kode Baru: "
+            DECLARE kode AS Integer = READ Integer from br
+            kodePerawatan.set(index, kode)
+            hargaPokok.set(index, CALL getHarga(kode))
+
+            DECLARE harga AS Integer = hargaPokok.get(index)
+            DECLARE ds AS Integer = 0
+            IF harga >= 1000000 THEN
+                ds = harga * 15 / 100
+            ELSE IF harga >= 100000 THEN
+                ds = harga * 5 / 100
+            END IF
+            discount.set(index, ds)
+            totalHarga.set(index, harga - ds)
+        ELSE
+            PRINT "Data tidak ada dalam database!"
+        END IF
+        PRINT "Data berhasil diedit!"
+        PRINT "Edit Data Lagi? (y/t): "
+        IF READ from br EQUALS "t" THEN
+            berjalan = false
+        END IF
+    END WHILE
+END FUNCTION
+
+FUNCTION deletePelanggan
+    DECLARE berjalan AS Boolean = true
+    WHILE berjalan IS TRUE
+        PRINT "HAPUS DATA"
+        CALL showAllPelanggan()
+        PRINT "Pilih nomor pelanggan yang ingin dihapus: "
+        DECLARE index AS Integer = READ Integer from br - 1
+
+        IF index IS VALID THEN
+            REMOVE index FROM noPelanggan
+            REMOVE index FROM namaPelanggan
+            REMOVE index FROM kodePerawatan
+            REMOVE index FROM hargaPokok
+            REMOVE index FROM discount
+            REMOVE index FROM totalHarga
+        ELSE
+            PRINT "Data tidak ada dalam database!"
+        END IF
+        PRINT "Data berhasil dihapus!"
+        PRINT "Hapus Data Lagi? (y/t): "
+        IF READ from br EQUALS "t" THEN
+            berjalan = false
+        END IF
+    END WHILE
+END FUNCTION
+
+FUNCTION getHarga(kode)
+    SWITCH kode
+        CASE 1: RETURN 87000
+        CASE 2: RETURN 125000
+        CASE 3: RETURN 775000
+        CASE 4: RETURN 968000
+        CASE 5: RETURN 1026000
+        DEFAULT: RETURN 0
+    END SWITCH
+END FUNCTION
+
+FUNCTION getPerawatan(kode)
+    SWITCH kode
+        CASE 1: RETURN "Kapsul a-DHA"
+        CASE 2: RETURN "Cream Wajah"
+        CASE 3: RETURN "Skin Treatmen"
+        CASE 4: RETURN "Face Treatmen"
+        CASE 5: RETURN "Suntik Wajah"
+        DEFAULT: RETURN "pilihan tidak tersedia"
+    END SWITCH
+END FUNCTION
+
+END PROGRAM
