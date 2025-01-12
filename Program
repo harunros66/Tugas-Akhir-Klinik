@@ -7,8 +7,8 @@ public class TugasAkhir {
     static ArrayList<String> namaPelanggan = new ArrayList<>();
     static ArrayList<Integer> kodePerawatan = new ArrayList<>();
     static ArrayList<Integer> hargaPokok = new ArrayList<>();
-    static ArrayList<Integer> totalHarga = new ArrayList<>();
-    static ArrayList<Integer> discount = new ArrayList<>();
+    static ArrayList<Double> totalHarga = new ArrayList<>();
+    static ArrayList<Double> discount = new ArrayList<>();
     static boolean jalan = true;
 
     static BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -25,7 +25,8 @@ public class TugasAkhir {
         System.out.println("2. Tambah Data Pelanggan");
         System.out.println("3. Edit Data Pelanggan");
         System.out.println("4. Hapus Data Pelanggan");
-        System.out.println("5. Keluar");
+        System.out.println("5. Cetak Kwitansi");
+        System.out.println("6. Keluar");
         System.out.print("Pilih menu: ");
         int pilihMenu = Integer.parseInt(br.readLine());
         
@@ -39,6 +40,8 @@ public class TugasAkhir {
             case 4:
                 deletePelanggan(); break;
             case 5:
+                kwitansi(); break;
+            case 6:
                 jalan = false;
                 System.out.println("Program dihentikan. Terima kasih!");
                 break;
@@ -119,20 +122,20 @@ public class TugasAkhir {
                     + "1. Kapsul a-DHA          : Rp. 87.000\n"
                     + "2. Cream Wajah           : Rp. 125.000\n"
                     + "3. Skin Treatmen         : Rp. 775.000\n"
-                        + "4. Face Treatmen         : Rp. 968.000\n"
+                    + "4. Face Treatmen         : Rp. 968.000\n"
                     + "5. Suntik Wajah          : Rp. 1.026.000\n");
             System.out.print("Masukkan Kode Pemesanan       : ");
             int kode = Integer.parseInt(br.readLine());
             int harga = getHarga(kode);
                 
-            int ds = 0;
+            double ds = 0;
             if (harga >= 1000000) {
-                ds = harga * 15 / 100;
+                ds = harga * 0.15;
             } else if (harga >= 100000) {
-                ds = harga * 5 / 100;
+                ds = harga * 0.05;
             }
                 
-            int totalHargaVal = harga - ds;
+            double totalHargaVal = harga - ds;
             discount.add(ds);
             kodePerawatan.add(kode);
             hargaPokok.add(harga);
@@ -150,69 +153,105 @@ public class TugasAkhir {
     static void editPelanggan() throws IOException {
         boolean berjalan = true;
         while (berjalan) {
-        System.out.println("\n==================================================== EDIT DATA ====================================================");
-        showAllPelanggan();
-        System.out.print("Pilih nomor pelanggan yang ingin di-edit: ");
-        int index = Integer.parseInt(br.readLine()) - 1;
-        
-        if (index >= 0 && index < noPelanggan.size()) {
-            System.out.print("Nomor Pelanggan baru : ");
-            noPelanggan.set(index, br.readLine());
-            System.out.print("Nama Pelanggan baru  : ");
-            namaPelanggan.set(index, br.readLine());
-            System.out.print("List Pesanan \n"
-                    + "1. Kapsul a-DHA          : Rp. 87.000\n"
-                    + "2. Cream Wajah           : Rp. 125.000\n"
-                    + "3. Skin Treatmen         : Rp. 775.000\n"
-                    + "4. Face Treatmen         : Rp. 968.000\n"
-                    + "5. Suntik Wajah          : Rp. 1.026.000\n");
-            System.out.print("Masukkan Kode Baru : ");
-            int kode = Integer.parseInt(br.readLine());
-            kodePerawatan.set(index, kode);
-            hargaPokok.set(index, getHarga(kode));
+            System.out.println("\n==================================================== EDIT DATA ====================================================");
+            showAllPelanggan();
+            System.out.print("Pilih nomor pelanggan yang ingin di-edit: ");
+            int index = Integer.parseInt(br.readLine()) - 1;
             
-            int harga = hargaPokok.get(index);  
-            int ds = 0;
-            if (harga >= 1000000) {
-                ds = harga * 15 / 100;
-            } else if (harga >= 100000) {
-                ds = harga * 5 / 100;
+            if (index >= 0 && index < noPelanggan.size()) {
+                System.out.print("Nomor Pelanggan baru : ");
+                noPelanggan.set(index, br.readLine());
+                System.out.print("Nama Pelanggan baru  : ");
+                namaPelanggan.set(index, br.readLine());
+                System.out.print("List Pesanan \n"
+                        + "1. Kapsul a-DHA          : Rp. 87.000\n"
+                        + "2. Cream Wajah           : Rp. 125.000\n"
+                        + "3. Skin Treatmen         : Rp. 775.000\n"
+                        + "4. Face Treatmen         : Rp. 968.000\n"
+                        + "5. Suntik Wajah          : Rp. 1.026.000\n");
+                System.out.print("Masukkan Kode Baru : ");
+                int kode = Integer.parseInt(br.readLine());
+                kodePerawatan.set(index, kode);
+                hargaPokok.set(index, getHarga(kode));
+                
+                int harga = hargaPokok.get(index);  
+                double ds = 0;
+                if (harga >= 1000000) {
+                    ds = harga * 0.15;
+                } else if (harga >= 100000) {
+                    ds = harga * 0.05;
+                }
+                discount.set(index, ds);
+                totalHarga.set(index, harga - ds);
+            } else {
+                System.out.println("Data tidak ada dalam database!");
             }
-            discount.set(index, ds);
-            totalHarga.set(index, harga - ds);
-        } else {
-            System.out.println("Data tidak ada dalam database!");
-        }
-        System.out.println("Data berhasil diedit!");
-        System.out.print("Edit Data Lagi? (y/t): ");
-        if (br.readLine().equalsIgnoreCase("t")) {
-            berjalan = false;}
+            System.out.println("Data berhasil diedit!");
+            System.out.print("Edit Data Lagi? (y/t): ");
+            if (br.readLine().equalsIgnoreCase("t")) {
+                berjalan = false;
+            }
         }
     }
 
     static void deletePelanggan() throws IOException {
         boolean berjalan = true;
         while (berjalan) {
-        System.out.println("\n==================================================== HAPUS DATA ===================================================");
-        showAllPelanggan();
-        System.out.print("Pilih nomor pelanggan yang ingin dihapus : ");
-        int index = Integer.parseInt(br.readLine()) - 1;
-        
-        if (index >= 0 && index < noPelanggan.size()) {
-            noPelanggan.remove(index);
-            namaPelanggan.remove(index);
-            kodePerawatan.remove(index);
-            hargaPokok.remove(index);
-            discount.remove(index);
-            totalHarga.remove(index);
+            System.out.println("\n==================================================== HAPUS DATA ===================================================");
+            showAllPelanggan();
+            System.out.print("Pilih nomor pelanggan yang ingin dihapus : ");
+            int index = Integer.parseInt(br.readLine()) - 1;
             
-        } else {
-            System.out.println("Data tidak ada dalam database!");
+            if (index >= 0 && index < noPelanggan.size()) {
+                System.out.print("Apakah Anda yakin ingin menghapus data ini? (y/t): ");
+                if (br.readLine().equalsIgnoreCase("y")) {
+                    noPelanggan.remove(index);
+                    namaPelanggan.remove(index);
+                    kodePerawatan.remove(index);
+                    hargaPokok.remove(index);
+                    discount.remove(index);
+                    totalHarga.remove(index);
+                    System.out.println("Data berhasil dihapus!");
+                } else {
+                    System.out.println("Penghapusan dibatalkan.");
+                }
+            } else {
+                System.out.println("Data tidak ada dalam database!");
+            }
+            System.out.print("Hapus Data Lagi? (y/t): ");
+            if (br.readLine().equalsIgnoreCase("t")) {
+                berjalan = false;
+            }
         }
-        System.out.println("Data berhasil dihapus!");
-        System.out.print("Hapus Data Lagi? (y/t): ");
-        if (br.readLine().equalsIgnoreCase("t")) {
-            berjalan = false;}
+    }
+
+    static void kwitansi() throws IOException {
+        System.out.println("======== CETAK KWITANSI ========");
+        if (noPelanggan.isEmpty()) {
+            System.out.println("Belum ada data untuk dicetak.");
+            return;
+        }
+        
+        showAllPelanggan();
+        System.out.print("Pilih nomor data untuk mencetak kwitansi: ");
+        int index = Integer.parseInt(br.readLine()) - 1;
+
+        if (index >= 0 && index < namaPelanggan.size()) {
+            System.out.println("===============================================");
+            System.out.println("                  Klinik Grand                 ");
+            System.out.println("===============================================");
+            System.out.printf("Nama          : %s\n", namaPelanggan.get(index));
+            System.out.println("------------------------------------------------");
+            System.out.printf("Produk        : %s\n", getPerawatan(kodePerawatan.get(index)));
+            System.out.printf("Harga Produk  : Rp.%s\n", hargaPokok.get(index));
+            System.out.printf("Discount      : Rp.%-10.2f\n", discount.get(index));
+            System.out.println("------------------------------------------------");
+            System.out.printf("Total Bayar   : Rp.%-10.2f\n", totalHarga.get(index));
+            System.out.println("------------------------------------------------");
+            System.out.println("     Terima kasih atas kunjungan Anda!         ");
+            System.out.println("===============================================");
+        } else {
+            System.out.println("Data tidak ditemukan.");
         }
     }
 
